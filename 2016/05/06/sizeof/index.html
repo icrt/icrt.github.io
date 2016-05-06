@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Linux,C/C++," />
 
 
 
@@ -86,15 +86,19 @@
 
 
 
-<meta name="description">
-<meta property="og:type" content="website">
-<meta property="og:title" content="ytZhou Blog">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="sizeofsizeof在C/C++作为操作符，而不是函数。sizeof操作符以字节的形式给出其操作数的大小。
+字节对齐(Data structure alignment)Wikipedia上关于字节对齐的解释：Data structure alignment is the way data is arranged and accessed in computer memory. It consi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基本数据类型，结构体，类的sizeof大小">
+<meta property="og:url" content="http://yoursite.com/2016/05/06/sizeof/index.html">
 <meta property="og:site_name" content="ytZhou Blog">
-<meta property="og:description">
+<meta property="og:description" content="sizeofsizeof在C/C++作为操作符，而不是函数。sizeof操作符以字节的形式给出其操作数的大小。
+字节对齐(Data structure alignment)Wikipedia上关于字节对齐的解释：Data structure alignment is the way data is arranged and accessed in computer memory. It consi">
+<meta property="og:updated_time" content="2016-05-06T14:20:19.762Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ytZhou Blog">
-<meta name="twitter:description">
+<meta name="twitter:title" content="基本数据类型，结构体，类的sizeof大小">
+<meta name="twitter:description" content="sizeofsizeof在C/C++作为操作符，而不是函数。sizeof操作符以字节的形式给出其操作数的大小。
+字节对齐(Data structure alignment)Wikipedia上关于字节对齐的解释：Data structure alignment is the way data is arranged and accessed in computer memory. It consi">
 
 
 
@@ -112,7 +116,7 @@
   };
 </script>
 
-  <title> ytZhou Blog </title>
+  <title> 基本数据类型，结构体，类的sizeof大小 | ytZhou Blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -133,9 +137,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left 
-   page-home 
- ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -242,9 +244,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
   
@@ -264,10 +266,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2016/05/06/sizeof/" itemprop="url">
-                  基本数据类型，结构体，类的sizeof大小
-                </a>
+                基本数据类型，结构体，类的sizeof大小
               
             
           </h1>
@@ -333,9 +332,7 @@
       
 
       
-        
-          
-            <h2 id="sizeof"><a href="#sizeof" class="headerlink" title="sizeof"></a>sizeof</h2><p>sizeof在C/C++作为操作符，而不是函数。sizeof操作符以字节的形式给出其操作数的大小。</p>
+        <h2 id="sizeof"><a href="#sizeof" class="headerlink" title="sizeof"></a>sizeof</h2><p>sizeof在C/C++作为操作符，而不是函数。sizeof操作符以字节的形式给出其操作数的大小。</p>
 <h2 id="字节对齐-Data-structure-alignment"><a href="#字节对齐-Data-structure-alignment" class="headerlink" title="字节对齐(Data structure alignment)"></a>字节对齐(Data structure alignment)</h2><p>Wikipedia上关于字节对齐的解释：<a href="https://en.wikipedia.org/wiki/Data_structure_alignment" target="_blank" rel="external"><strong>Data structure alignment</strong></a> is the way data is arranged and accessed in computer memory. It consists of two separate but related issues: data alignment and data structure padding. When a modern computer reads from or writes to a memory address, it will do this in word sized chunks (e.g. 4 byte chunks on a 32-bit system) or larger. Data alignment means putting the data at a memory address equal to some multiple of the word size, which increases the system’s performance due to the way the CPU handles memory. To align the data, it may be necessary to insert some meaningless bytes between the end of the last data structure and the start of the next, which is data structure padding.<br>从这段解释我们可以知道字节对齐的原因是：</p>
 <ul>
 <li>加快CPU访问内存中数据的速度；如果将数据存放在偶地址开始那么读出32bit变量时，仅仅需要一个周期，反之放在奇数地址之上需要两个周期才能读出。</li>
@@ -365,164 +362,60 @@
 </ul>
 <p>Linux 64bit下编译<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$g++ class.cc -o class</span><br><span class="line">$./class</span><br><span class="line">the size of pointer is 8</span><br><span class="line">the size of nullClass is 1</span><br><span class="line">the size of nullClassVirtual 8</span><br><span class="line">the size of staticClass 1</span><br><span class="line">the size fo staticConstClass 1</span><br><span class="line">the size of Base is 32</span><br><span class="line">the size of Drive is 32</span><br></pre></td></tr></table></figure></p>
 
-          
+      
+    </div>
+
+    <div>
+      
         
       
     </div>
 
     <div>
       
-    </div>
+        
 
-    <div>
       
     </div>
 
     <footer class="post-footer">
       
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/06/hello-world/" itemprop="url">
-                  Hello World
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-06T09:56:11+08:00" content="2016-05-06">
-              2016-05-06
-            </time>
-          </span>
-
+        <div class="post-tags">
           
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Hexo/" itemprop="url" rel="index">
-                    <span itemprop="name">Hexo</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
+            <a href="/tags/Linux/" rel="tag">#Linux</a>
           
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/05/06/hello-world/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/06/hello-world/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
+            <a href="/tags/C-C/" rel="tag">#C/C++</a>
           
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/06/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
+          </div>
 
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
       
 
       
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -530,6 +423,14 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/05/06/sizeof/"
+           data-title="基本数据类型，结构体，类的sizeof大小" data-url="http://yoursite.com/2016/05/06/sizeof/">
+      </div>
+    
+  </div>
+
 
         </div>
         
@@ -549,8 +450,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.gif"
@@ -607,6 +517,17 @@
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#sizeof"><span class="nav-number">1.</span> <span class="nav-text">sizeof</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#字节对齐-Data-structure-alignment"><span class="nav-number">2.</span> <span class="nav-text">字节对齐(Data structure alignment)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实例"><span class="nav-number">3.</span> <span class="nav-text">实例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#结构体大小"><span class="nav-number">3.0.1.</span> <span class="nav-text">结构体大小</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#类的大小"><span class="nav-number">3.0.2.</span> <span class="nav-text">类的大小</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -710,6 +631,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
 
   
 
