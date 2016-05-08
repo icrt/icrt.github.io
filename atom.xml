@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>ytZhou Blog</title>
-  
+  <subtitle>代码 生活 阅读 思考 运动 旅行 摄影</subtitle>
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2016-05-06T14:20:19.762Z</updated>
+  <updated>2016-05-08T03:53:21.693Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,85 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>POSIX Threads Programming（POSIX线程编程）</title>
+    <link href="http://yoursite.com/2016/05/08/POSIX-Threads-Programming/"/>
+    <id>http://yoursite.com/2016/05/08/POSIX-Threads-Programming/</id>
+    <published>2016-05-08T03:04:03.000Z</published>
+    <updated>2016-05-08T03:53:21.693Z</updated>
+    
+    <content type="html">&lt;p&gt;本文翻译自&lt;a href=&quot;https://computing.llnl.gov/tutorials/pthreads/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;POSIX Threads Programming&lt;/a&gt;，原作者是：Author: Blaise Barney, Lawrence Livermore National Laboratory&lt;br&gt;翻译缘由：某次面试面试官的问题，让我一直在思考如何高效的使用线程及其锁，思考很长一段时间没有答案，缺乏实际的负载和场景让我能够真切体会和验证。网上关于锁性能和线程的问题并不多，往往只是简单的介绍编程接口，并在假设的场景下对锁的使用进行介绍，在IBM开发者社区看到一些文章，但是也是比较浅显，没有太直接深入。偶然的机会找到这篇文章，觉得还不错，因此将它翻译出来，一是自己能够从中学习到一些东西和加深理解，另外一点顺道巩固英语（雅思囧）。&lt;/p&gt;
+&lt;h1 id=&quot;目录&quot;&gt;&lt;a href=&quot;#目录&quot; class=&quot;headerlink&quot; title=&quot;目录&quot;&gt;&lt;/a&gt;目录&lt;/h1&gt;&lt;h1 id=&quot;摘要&quot;&gt;&lt;a href=&quot;#摘要&quot; class=&quot;headerlink&quot; title=&quot;摘要&quot;&gt;&lt;/a&gt;摘要&lt;/h1&gt;&lt;p&gt;在共享内存多处理器架构下，线程可以用来实现并行。硬件厂商会以他们自己私有的方式实现线程，这使得可移植性成为开发人员关心的问题。对于UNIX系统而言，IEEE POSIX 1003.1c标准将c语言线程编程接口标准化了，这个标准的具体实现就是POSIX threads或者Pthreads.&lt;/p&gt;
+&lt;p&gt;这份材料首先介绍了使用线程需要了解的概念、出发点（动机）和设计方面的考虑。然后，对于三类主要的Pthreads API例程进行了介绍：线程管理，互斥量（Mutex Variables）和条件变量（Condition Variables）。通过示例代码的演示，线程编程新手可以快速学会如何使用这些接口。这份材料包含了对LLNL细节以及MPI和线程混合编程的讨论。作为练习，许多示例代码（c语言实现）也包括在内。&lt;/p&gt;
+&lt;p&gt;适合的读者/先决条件：这份材料主要是针对那些刚刚接触并行编程的人。阅读这份材料需要对C中并行编程有个基本的了解。对于那些对并行编程并不了解的人，可以参考&lt;a href=&quot;https://computing.llnl.gov/tutorials/parallel_comp&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;EC3500: Introduction to Parallel Computing&lt;/a&gt;。&lt;/p&gt;
+&lt;h1 id=&quot;Pthreads概览&quot;&gt;&lt;a href=&quot;#Pthreads概览&quot; class=&quot;headerlink&quot; title=&quot;Pthreads概览&quot;&gt;&lt;/a&gt;Pthreads概览&lt;/h1&gt;&lt;h2 id=&quot;线程是什么？&quot;&gt;&lt;a href=&quot;#线程是什么？&quot; class=&quot;headerlink&quot; title=&quot;线程是什么？&quot;&gt;&lt;/a&gt;线程是什么？&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;严格的来说，一个线程被定义为由操作系统调度的一个独立的指令流。这意味着什么？&lt;/li&gt;
+&lt;li&gt;对于开发人员而言，或许对线程最好的描述是：一个独立于它的主程序（main program）运行的“程序”（procedure）。&lt;/li&gt;
+&lt;li&gt;在深入一步，想象一下一个主程序（a.out）包含多个程序（procedures），然后这些程序可以被操作系统同时或者独立的运行，这就是对多线程程序的描述。（译者注：其实可以理解为一个程序有多条不同的执行路径在同时执行。）&lt;/li&gt;
+&lt;li&gt;这是怎么做到的呢？&lt;/li&gt;
+&lt;li&gt;在理解线程之前，首先需要理解UNIX进程。一个进程有操作系统创建，这需要一定的开销（译者注：需要加载可执行文件，构建运行时环境，创建内存空间地址及其映射，打开三个标准的输入输出等等。具体可以参考《程序员的自我修养》）。进程包含了程序的资源以及执行状态，有：&lt;ul&gt;
+&lt;li&gt;线程ID，线程组ID，用户ID，以及用户组ID&lt;/li&gt;
+&lt;li&gt;环境&lt;/li&gt;
+&lt;li&gt;工作目录&lt;/li&gt;
+&lt;li&gt;程序执行&lt;/li&gt;
+&lt;li&gt;寄存器&lt;/li&gt;
+&lt;li&gt;栈&lt;/li&gt;
+&lt;li&gt;堆&lt;/li&gt;
+&lt;li&gt;文件描述符&lt;/li&gt;
+&lt;li&gt;信号执行函数&lt;/li&gt;
+&lt;li&gt;共享库&lt;/li&gt;
+&lt;li&gt;进程间通信的工具（比如消息队列，pipes，信号量或者是内存共享）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文翻译自&lt;a href=&quot;https://computing.llnl.gov/tutorials/pthreads/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;POSIX Threads Programming&lt;/a&gt;，原作者是：Author: B
+    
+    </summary>
+    
+      <category term="Code" scheme="http://yoursite.com/categories/Code/"/>
+    
+    
+      <category term="Linux" scheme="http://yoursite.com/tags/Linux/"/>
+    
+      <category term="C/C++" scheme="http://yoursite.com/tags/C-C/"/>
+    
+      <category term="Lock" scheme="http://yoursite.com/tags/Lock/"/>
+    
+      <category term="Translate" scheme="http://yoursite.com/tags/Translate/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>为什么使用锁？自己的一些思考，以及死锁调试的方法</title>
+    <link href="http://yoursite.com/2016/05/07/WhyUseLock/"/>
+    <id>http://yoursite.com/2016/05/07/WhyUseLock/</id>
+    <published>2016-05-07T13:57:49.000Z</published>
+    <updated>2016-05-08T01:59:08.677Z</updated>
+    
+    <content type="html">&lt;p&gt;锁和并发是一个非常大话题，往往在实际中大家都有点敬而远之，而网上的资料，特别是某度查出来的东西就是千篇一律互相Copy，很难看到有自己的思考在里面，很少会去讲为什么使用锁。如何高效的使用锁。&lt;br&gt;某次面试面试官直接上来就说给我讲讲你满意的项目，然后就讲了之前基于Fuse写的数据去重文件。在讲的过程当中提到了使用了互斥锁pthread_mutex_lock，这个时候面试官打断了我，问到为什么要使用锁？在什么样的真实场景下需要使用锁？当时讲了两个应用同时读写一个文件，出现数据不一致。面试官强调了一下，给个实际的例子。当时没给出很实际的例子，后来面试官说我那样使用锁并不高效。&lt;br&gt;在面试过程中当中发现面试官其实非常强调合理和高效的使用锁，二面面试官当时也给出了问题，在高并发和高查询下，如何在不使用的锁的情况，完成数据更新的情况并保证不打断查询。当时给的解决方案是先将数据更新到另外一个地方，然后再将查询指向那个更新的地方，因为修改指针其实非常快。如果非要死扣细节的话，最佳应该是配合使用voilate关键字。&lt;/p&gt;
+&lt;h2 id=&quot;为什么使用锁&quot;&gt;&lt;a href=&quot;#为什么使用锁&quot; class=&quot;headerlink&quot; title=&quot;为什么使用锁&quot;&gt;&lt;/a&gt;为什么使用锁&lt;/h2&gt;&lt;h2 id=&quot;锁的性能&quot;&gt;&lt;a href=&quot;#锁的性能&quot; class=&quot;headerlink&quot; title=&quot;锁的性能&quot;&gt;&lt;/a&gt;锁的性能&lt;/h2&gt;&lt;h2 id=&quot;自己调试死锁的一些方法&quot;&gt;&lt;a href=&quot;#自己调试死锁的一些方法&quot; class=&quot;headerlink&quot; title=&quot;自己调试死锁的一些方法&quot;&gt;&lt;/a&gt;自己调试死锁的一些方法&lt;/h2&gt;&lt;h2 id=&quot;待续&quot;&gt;&lt;a href=&quot;#待续&quot; class=&quot;headerlink&quot; title=&quot;待续&quot;&gt;&lt;/a&gt;待续&lt;/h2&gt;</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;锁和并发是一个非常大话题，往往在实际中大家都有点敬而远之，而网上的资料，特别是某度查出来的东西就是千篇一律互相Copy，很难看到有自己的思考在里面，很少会去讲为什么使用锁。如何高效的使用锁。&lt;br&gt;某次面试面试官直接上来就说给我讲讲你满意的项目，然后就讲了之前基于Fuse写
+    
+    </summary>
+    
+      <category term="Code" scheme="http://yoursite.com/categories/Code/"/>
+    
+    
+      <category term="Linux" scheme="http://yoursite.com/tags/Linux/"/>
+    
+      <category term="C/C++" scheme="http://yoursite.com/tags/C-C/"/>
+    
+      <category term="Lock" scheme="http://yoursite.com/tags/Lock/"/>
+    
+  </entry>
   
   <entry>
     <title>基本数据类型，结构体，类的sizeof大小</title>

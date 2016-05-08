@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Testing,Hexo," />
+  <meta name="keywords" content="Linux,C/C++,Lock," />
 
 
 
@@ -86,19 +86,16 @@
 
 
 
-<meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick">
+<meta name="description" content="锁和并发是一个非常大话题，往往在实际中大家都有点敬而远之，而网上的资料，特别是某度查出来的东西就是千篇一律互相Copy，很难看到有自己的思考在里面，很少会去讲为什么使用锁。如何高效的使用锁。某次面试面试官直接上来就说给我讲讲你满意的项目，然后就讲了之前基于Fuse写的数据去重文件。在讲的过程当中提到了使用了互斥锁pthread_mutex_lock，这个时候面试官打断了我，问到为什么要使用锁？在什">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://yoursite.com/2016/05/06/hello-world/index.html">
+<meta property="og:title" content="为什么使用锁？自己的一些思考，以及死锁调试的方法">
+<meta property="og:url" content="http://yoursite.com/2016/05/07/WhyUseLock/index.html">
 <meta property="og:site_name" content="ytZhou Blog">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick">
-<meta property="og:updated_time" content="2016-05-06T07:35:44.462Z">
+<meta property="og:description" content="锁和并发是一个非常大话题，往往在实际中大家都有点敬而远之，而网上的资料，特别是某度查出来的东西就是千篇一律互相Copy，很难看到有自己的思考在里面，很少会去讲为什么使用锁。如何高效的使用锁。某次面试面试官直接上来就说给我讲讲你满意的项目，然后就讲了之前基于Fuse写的数据去重文件。在讲的过程当中提到了使用了互斥锁pthread_mutex_lock，这个时候面试官打断了我，问到为什么要使用锁？在什">
+<meta property="og:updated_time" content="2016-05-08T01:59:08.677Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hello World">
-<meta name="twitter:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick">
+<meta name="twitter:title" content="为什么使用锁？自己的一些思考，以及死锁调试的方法">
+<meta name="twitter:description" content="锁和并发是一个非常大话题，往往在实际中大家都有点敬而远之，而网上的资料，特别是某度查出来的东西就是千篇一律互相Copy，很难看到有自己的思考在里面，很少会去讲为什么使用锁。如何高效的使用锁。某次面试面试官直接上来就说给我讲讲你满意的项目，然后就讲了之前基于Fuse写的数据去重文件。在讲的过程当中提到了使用了互斥锁pthread_mutex_lock，这个时候面试官打断了我，问到为什么要使用锁？在什">
 
 
 
@@ -116,7 +113,7 @@ Quick">
   };
 </script>
 
-  <title> Hello World | ytZhou Blog </title>
+  <title> 为什么使用锁？自己的一些思考，以及死锁调试的方法 | ytZhou Blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -256,7 +253,7 @@ Quick">
             
             
               
-                Hello World
+                为什么使用锁？自己的一些思考，以及死锁调试的方法
               
             
           </h1>
@@ -268,8 +265,8 @@ Quick">
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-06T09:56:11+08:00" content="2016-05-06">
-              2016-05-06
+            <time itemprop="dateCreated" datetime="2016-05-07T21:57:49+08:00" content="2016-05-07">
+              2016-05-07
             </time>
           </span>
 
@@ -282,8 +279,8 @@ Quick">
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Hexo/" itemprop="url" rel="index">
-                    <span itemprop="name">Hexo</span>
+                  <a href="/categories/Code/" itemprop="url" rel="index">
+                    <span itemprop="name">Code</span>
                   </a>
                 </span>
 
@@ -298,8 +295,8 @@ Quick">
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/05/06/hello-world/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/06/hello-world/" itemprop="commentsCount"></span>
+                <a href="/2016/05/07/WhyUseLock/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/07/WhyUseLock/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -322,16 +319,8 @@ Quick">
       
 
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-
+        <p>锁和并发是一个非常大话题，往往在实际中大家都有点敬而远之，而网上的资料，特别是某度查出来的东西就是千篇一律互相Copy，很难看到有自己的思考在里面，很少会去讲为什么使用锁。如何高效的使用锁。<br>某次面试面试官直接上来就说给我讲讲你满意的项目，然后就讲了之前基于Fuse写的数据去重文件。在讲的过程当中提到了使用了互斥锁pthread_mutex_lock，这个时候面试官打断了我，问到为什么要使用锁？在什么样的真实场景下需要使用锁？当时讲了两个应用同时读写一个文件，出现数据不一致。面试官强调了一下，给个实际的例子。当时没给出很实际的例子，后来面试官说我那样使用锁并不高效。<br>在面试过程中当中发现面试官其实非常强调合理和高效的使用锁，二面面试官当时也给出了问题，在高并发和高查询下，如何在不使用的锁的情况，完成数据更新的情况并保证不打断查询。当时给的解决方案是先将数据更新到另外一个地方，然后再将查询指向那个更新的地方，因为修改指针其实非常快。如果非要死扣细节的话，最佳应该是配合使用voilate关键字。</p>
+<h2 id="为什么使用锁"><a href="#为什么使用锁" class="headerlink" title="为什么使用锁"></a>为什么使用锁</h2><h2 id="锁的性能"><a href="#锁的性能" class="headerlink" title="锁的性能"></a>锁的性能</h2><h2 id="自己调试死锁的一些方法"><a href="#自己调试死锁的一些方法" class="headerlink" title="自己调试死锁的一些方法"></a>自己调试死锁的一些方法</h2><h2 id="待续"><a href="#待续" class="headerlink" title="待续"></a>待续</h2>
       
     </div>
 
@@ -352,9 +341,11 @@ Quick">
       
         <div class="post-tags">
           
-            <a href="/tags/Testing/" rel="tag">#Testing</a>
+            <a href="/tags/Linux/" rel="tag">#Linux</a>
           
-            <a href="/tags/Hexo/" rel="tag">#Hexo</a>
+            <a href="/tags/C-C/" rel="tag">#C/C++</a>
+          
+            <a href="/tags/Lock/" rel="tag">#Lock</a>
           
         </div>
       
@@ -363,12 +354,16 @@ Quick">
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2016/05/06/sizeof/" rel="next" title="基本数据类型，结构体，类的sizeof大小">
+                <i class="fa fa-chevron-left"></i> 基本数据类型，结构体，类的sizeof大小
+              </a>
+            
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/05/06/sizeof/" rel="prev" title="基本数据类型，结构体，类的sizeof大小">
-                基本数据类型，结构体，类的sizeof大小 <i class="fa fa-chevron-right"></i>
+              <a href="/2016/05/08/POSIX-Threads-Programming/" rel="prev" title="POSIX Threads Programming（POSIX线程编程）">
+                POSIX Threads Programming（POSIX线程编程） <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -395,8 +390,8 @@ Quick">
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/05/06/hello-world/"
-           data-title="Hello World" data-url="http://yoursite.com/2016/05/06/hello-world/">
+      <div class="ds-thread" data-thread-key="2016/05/07/WhyUseLock/"
+           data-title="为什么使用锁？自己的一些思考，以及死锁调试的方法" data-url="http://yoursite.com/2016/05/07/WhyUseLock/">
       </div>
     
   </div>
@@ -514,7 +509,7 @@ Quick">
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Quick-Start"><span class="nav-number">1.</span> <span class="nav-text">Quick Start</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Create-a-new-post"><span class="nav-number">1.1.</span> <span class="nav-text">Create a new post</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Run-server"><span class="nav-number">1.2.</span> <span class="nav-text">Run server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generate-static-files"><span class="nav-number">1.3.</span> <span class="nav-text">Generate static files</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Deploy-to-remote-sites"><span class="nav-number">1.4.</span> <span class="nav-text">Deploy to remote sites</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么使用锁"><span class="nav-number">1.</span> <span class="nav-text">为什么使用锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#锁的性能"><span class="nav-number">2.</span> <span class="nav-text">锁的性能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自己调试死锁的一些方法"><span class="nav-number">3.</span> <span class="nav-text">自己调试死锁的一些方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#待续"><span class="nav-number">4.</span> <span class="nav-text">待续</span></a></li></ol></div>
             
           </div>
         </section>

@@ -149,7 +149,7 @@
       <span class="logo-line-after"><i></i></span>
     </a>
   </div>
-  <p class="site-subtitle"></p>
+  <p class="site-subtitle">代码 生活 阅读 思考 运动 旅行 摄影</p>
 </div>
 
 <div class="site-nav-toggle">
@@ -187,16 +187,6 @@
         </li>
       
         
-        <li class="menu-item menu-item-about">
-          <a href="/about" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
-            
-            关于
-          </a>
-        </li>
-      
-        
         <li class="menu-item menu-item-archives">
           <a href="/archives" rel="section">
             
@@ -217,12 +207,12 @@
         </li>
       
         
-        <li class="menu-item menu-item-commonweal">
-          <a href="/404.html" rel="section">
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
             
-            公益404
+            关于
           </a>
         </li>
       
@@ -243,6 +233,269 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/05/08/POSIX-Threads-Programming/" itemprop="url">
+                  POSIX Threads Programming（POSIX线程编程）
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-08T11:04:03+08:00" content="2016-05-08">
+              2016-05-08
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Code/" itemprop="url" rel="index">
+                    <span itemprop="name">Code</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/08/POSIX-Threads-Programming/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/08/POSIX-Threads-Programming/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>本文翻译自<a href="https://computing.llnl.gov/tutorials/pthreads/" target="_blank" rel="external">POSIX Threads Programming</a>，原作者是：Author: Blaise Barney, Lawrence Livermore National Laboratory<br>翻译缘由：某次面试面试官的问题，让我一直在思考如何高效的使用线程及其锁，思考很长一段时间没有答案，缺乏实际的负载和场景让我能够真切体会和验证。网上关于锁性能和线程的问题并不多，往往只是简单的介绍编程接口，并在假设的场景下对锁的使用进行介绍，在IBM开发者社区看到一些文章，但是也是比较浅显，没有太直接深入。偶然的机会找到这篇文章，觉得还不错，因此将它翻译出来，一是自己能够从中学习到一些东西和加深理解，另外一点顺道巩固英语（雅思囧）。</p>
+<h1 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h1><h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>在共享内存多处理器架构下，线程可以用来实现并行。硬件厂商会以他们自己私有的方式实现线程，这使得可移植性成为开发人员关心的问题。对于UNIX系统而言，IEEE POSIX 1003.1c标准将c语言线程编程接口标准化了，这个标准的具体实现就是POSIX threads或者Pthreads.</p>
+<p>这份材料首先介绍了使用线程需要了解的概念、出发点（动机）和设计方面的考虑。然后，对于三类主要的Pthreads API例程进行了介绍：线程管理，互斥量（Mutex Variables）和条件变量（Condition Variables）。通过示例代码的演示，线程编程新手可以快速学会如何使用这些接口。这份材料包含了对LLNL细节以及MPI和线程混合编程的讨论。作为练习，许多示例代码（c语言实现）也包括在内。</p>
+<p>适合的读者/先决条件：这份材料主要是针对那些刚刚接触并行编程的人。阅读这份材料需要对C中并行编程有个基本的了解。对于那些对并行编程并不了解的人，可以参考<a href="https://computing.llnl.gov/tutorials/parallel_comp" target="_blank" rel="external">EC3500: Introduction to Parallel Computing</a>。</p>
+<h1 id="Pthreads概览"><a href="#Pthreads概览" class="headerlink" title="Pthreads概览"></a>Pthreads概览</h1><h2 id="线程是什么？"><a href="#线程是什么？" class="headerlink" title="线程是什么？"></a>线程是什么？</h2><ul>
+<li>严格的来说，一个线程被定义为由操作系统调度的一个独立的指令流。这意味着什么？</li>
+<li>对于开发人员而言，或许对线程最好的描述是：一个独立于它的主程序（main program）运行的“程序”（procedure）。</li>
+<li>在深入一步，想象一下一个主程序（a.out）包含多个程序（procedures），然后这些程序可以被操作系统同时或者独立的运行，这就是对多线程程序的描述。（译者注：其实可以理解为一个程序有多条不同的执行路径在同时执行。）</li>
+<li>这是怎么做到的呢？</li>
+<li>在理解线程之前，首先需要理解UNIX进程。一个进程有操作系统创建，这需要一定的开销（译者注：需要加载可执行文件，构建运行时环境，创建内存空间地址及其映射，打开三个标准的输入输出等等。具体可以参考《程序员的自我修养》）。进程包含了程序的资源以及执行状态，有：<ul>
+<li>线程ID，线程组ID，用户ID，以及用户组ID</li>
+<li>环境</li>
+<li>工作目录</li>
+<li>程序执行</li>
+<li>寄存器</li>
+<li>栈</li>
+<li>堆</li>
+<li>文件描述符</li>
+<li>信号执行函数</li>
+<li>共享库</li>
+<li>进程间通信的工具（比如消息队列，pipes，信号量或者是内存共享）</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/05/07/WhyUseLock/" itemprop="url">
+                  为什么使用锁？自己的一些思考，以及死锁调试的方法
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-07T21:57:49+08:00" content="2016-05-07">
+              2016-05-07
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Code/" itemprop="url" rel="index">
+                    <span itemprop="name">Code</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/07/WhyUseLock/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/07/WhyUseLock/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>锁和并发是一个非常大话题，往往在实际中大家都有点敬而远之，而网上的资料，特别是某度查出来的东西就是千篇一律互相Copy，很难看到有自己的思考在里面，很少会去讲为什么使用锁。如何高效的使用锁。<br>某次面试面试官直接上来就说给我讲讲你满意的项目，然后就讲了之前基于Fuse写的数据去重文件。在讲的过程当中提到了使用了互斥锁pthread_mutex_lock，这个时候面试官打断了我，问到为什么要使用锁？在什么样的真实场景下需要使用锁？当时讲了两个应用同时读写一个文件，出现数据不一致。面试官强调了一下，给个实际的例子。当时没给出很实际的例子，后来面试官说我那样使用锁并不高效。<br>在面试过程中当中发现面试官其实非常强调合理和高效的使用锁，二面面试官当时也给出了问题，在高并发和高查询下，如何在不使用的锁的情况，完成数据更新的情况并保证不打断查询。当时给的解决方案是先将数据更新到另外一个地方，然后再将查询指向那个更新的地方，因为修改指针其实非常快。如果非要死扣细节的话，最佳应该是配合使用voilate关键字。</p>
+<h2 id="为什么使用锁"><a href="#为什么使用锁" class="headerlink" title="为什么使用锁"></a>为什么使用锁</h2><h2 id="锁的性能"><a href="#锁的性能" class="headerlink" title="锁的性能"></a>锁的性能</h2><h2 id="自己调试死锁的一些方法"><a href="#自己调试死锁的一些方法" class="headerlink" title="自己调试死锁的一些方法"></a>自己调试死锁的一些方法</h2><h2 id="待续"><a href="#待续" class="headerlink" title="待续"></a>待续</h2>
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
     
       
 
@@ -553,7 +806,7 @@
       <section class="site-overview sidebar-panel  sidebar-panel-active ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
-               src="/images/avatar.gif"
+               src="/image/avatar.png"
                alt="ytZhou" />
           <p class="site-author-name" itemprop="name">ytZhou</p>
           <p class="site-description motion-element" itemprop="description"></p>
@@ -561,7 +814,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">2</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -578,7 +831,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -596,6 +849,26 @@
         
 
         <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/ytZhou" target="_blank" title="github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  github
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://ytZhou.lofter.com" target="_blank" title="lofter">
+                  
+                    <i class="fa fa-fw fa-lofter"></i>
+                  
+                  lofter
+                </a>
+              </span>
+            
           
         </div>
 
