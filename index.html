@@ -256,7 +256,7 @@
               
                 
                 <a class="post-title-link" href="/2016/05/08/POSIX-Threads-Programming/" itemprop="url">
-                  POSIX Threads Programming（POSIX线程编程）
+                  (译)POSIX Threads Programming（POSIX线程编程）
                 </a>
               
             
@@ -325,8 +325,15 @@
       
         
           
-            <p>本文翻译自<a href="https://computing.llnl.gov/tutorials/pthreads/" target="_blank" rel="external">POSIX Threads Programming</a>，原作者是：Author: Blaise Barney, Lawrence Livermore National Laboratory<br>翻译缘由：某次面试面试官的问题，让我一直在思考如何高效的使用线程及其锁，思考很长一段时间没有答案，缺乏实际的负载和场景让我能够真切体会和验证。网上关于锁性能和线程的问题并不多，往往只是简单的介绍编程接口，并在假设的场景下对锁的使用进行介绍，在IBM开发者社区看到一些文章，但是也是比较浅显，没有太直接深入。偶然的机会找到这篇文章，觉得还不错，因此将它翻译出来，一是自己能够从中学习到一些东西和加深理解，另外一点顺道巩固英语（雅思囧）。</p>
-<h1 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h1><h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>在共享内存多处理器架构下，线程可以用来实现并行。硬件厂商会以他们自己私有的方式实现线程，这使得可移植性成为开发人员关心的问题。对于UNIX系统而言，IEEE POSIX 1003.1c标准将c语言线程编程接口标准化了，这个标准的具体实现就是POSIX threads或者Pthreads.</p>
+            <p>本文翻译自<a href="https://computing.llnl.gov/tutorials/pthreads/" target="_blank" rel="external">POSIX Threads Programming</a>，原作者是：Blaise Barney, Lawrence Livermore National Laboratory<br>翻译缘由：某次面试面试官的问题，让我一直在思考如何高效的使用线程及其锁，思考很长一段时间没有答案，缺乏实际的负载和场景让我能够真切体会和验证。网上关于锁性能和线程的问题并不多，往往只是简单的介绍编程接口，并在假设的场景下对锁的使用进行介绍，在IBM开发者社区看到一些文章，但是也是比较浅显，没有太直接深入。偶然的机会找到这篇文章，觉得还不错，因此将它翻译出来，一是自己能够从中学习到一些东西和加深理解，另外一点顺道巩固英语（雅思囧）。</p>
+<h1 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h1><ol>
+<li>摘要</li>
+<li>线程概述<br>  2.1 线程是什么？<br> 2.2 Pthreas是什么？<br> 2.3 是什么使用线程？<br> 2.4 线程编程的设计</li>
+<li>Pthreads API</li>
+<li>编译线程程序</li>
+<li>线程管理<br> 5.1 创建和终止线程<br> 5.2 传递参数给线程<br> 5.3 线程结合（Joing）和分离</li>
+</ol>
+<h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>在共享内存多处理器架构下，线程可以用来实现并行。硬件厂商会以他们自己私有的方式实现线程，这使得可移植性成为开发人员关心的问题。对于UNIX系统而言，IEEE POSIX 1003.1c标准将c语言线程编程接口标准化了，这个标准的具体实现就是POSIX threads或者Pthreads.</p>
 <p>这份材料首先介绍了使用线程需要了解的概念、出发点（动机）和设计方面的考虑。然后，对于三类主要的Pthreads API例程进行了介绍：线程管理，互斥量（Mutex Variables）和条件变量（Condition Variables）。通过示例代码的演示，线程编程新手可以快速学会如何使用这些接口。这份材料包含了对LLNL细节以及MPI和线程混合编程的讨论。作为练习，许多示例代码（c语言实现）也包括在内。</p>
 <p>适合的读者/先决条件：这份材料主要是针对那些刚刚接触并行编程的人。阅读这份材料需要对C中并行编程有个基本的了解。对于那些对并行编程并不了解的人，可以参考<a href="https://computing.llnl.gov/tutorials/parallel_comp" target="_blank" rel="external">EC3500: Introduction to Parallel Computing</a>。</p>
 <h1 id="Pthreads概览"><a href="#Pthreads概览" class="headerlink" title="Pthreads概览"></a>Pthreads概览</h1><h2 id="线程是什么？"><a href="#线程是什么？" class="headerlink" title="线程是什么？"></a>线程是什么？</h2><ul>
@@ -349,7 +356,58 @@
 </ul>
 </li>
 </ul>
+<p><img src="https://computing.llnl.gov/tutorials/pthreads/images/process.gif"><strong>UNIX进程</strong><br><img src="https://computing.llnl.gov/tutorials/pthreads/images/thread.gif"><strong>包含线程的UNIX进程</strong></p>
+<ul>
+<li>线程使用并且与进程的这些资源一同存在，还能够成为操作系统调度和运行的实体。这是因为线程中仅仅包含独立运行需要的资源。</li>
+<li>线程能够成为独立的执行和调度单位，是因为线程自己维护了：<ul>
+<li>栈指针</li>
+<li>寄存器</li>
+<li>调度的属性（比如策略或者优先级）</li>
+<li>包含处理和阻塞的信号集</li>
+<li>线程特定的数据</li>
+</ul>
+</li>
+<li>总结，对于一个UNIX环境下的线程：<ul>
+<li>存在于某个特定的进程之内，并且使用这个特定进程的资源</li>
+<li>拥有自己独立的控制流只要他的父进程存在并且操作系统支持</li>
+<li>仅仅包含独立调度所需的资源</li>
+<li>与其他线程共享父进程的资源</li>
+<li>父进程消亡时，线程也消亡</li>
+<li>轻量级。因为创建进程需要完成更多资源分配，而线程仅仅包含很少的资源。</li>
+</ul>
+</li>
+<li>因为同一个进程中的线程共享资源：<ul>
+<li>一个线程修改共享的资源能够被其他线程知道</li>
+<li>两个指针有相同的值并指向相同的数据</li>
+<li>能够读写相同的内存地址，因此需要开发者指定同步方式</li>
+</ul>
+</li>
+</ul>
+<h2 id="Pthreads是什么？"><a href="#Pthreads是什么？" class="headerlink" title="Pthreads是什么？"></a>Pthreads是什么？</h2><ul>
+<li>一直以来，硬件厂商以他们自己的方式实现了线程。不同厂商之间的实现基本是不同的，这就使得开发者很难使用线程开发出基于移植性的程序。</li>
+<li>为了能够有效利用线程带来的好处，需要一份编程标准：<ul>
+<li>对于UNIX系统，这些接口由IEEE POSIX 1003.1c标准指定（1995）</li>
+<li>POSIX或者Pthreads就是对这个标准的实现</li>
+<li>现在大多数的硬件厂商除了他们私有的API外，都已经提供Pthreads</li>
+</ul>
+</li>
+<li>POSIX标准在不断的演变和修改，包括Pthreads规范</li>
+<li>一些有用的链接<ul>
+<li><a href="http://standards.ieee.org/findstds/standard/1003.1-2008.html" target="_blank" rel="external">standards.ieee.org/findstds/standard/1003.1-2008.html</a></li>
+<li><a href="http://www.opengroup.org/austin/papers/posix_faq.html" target="_blank" rel="external">www.opengroup.org/austin/papers/posix_faq.html</a></li>
+<li><a href="http://www.unix.org/version3/ieee_std.html" target="_blank" rel="external">www.unix.org/version3/ieee_std.html</a></li>
+</ul>
+</li>
+<li>Pthreads被定义为一组C语言编程接口和调用，通过pthread.h头文件和一个线程库实现——在某些实现中，这个线程库或许是其他库的一部分，比如libc.</li>
+</ul>
+<h2 id="为什么使用线程？"><a href="#为什么使用线程？" class="headerlink" title="为什么使用线程？"></a>为什么使用线程？</h2><h4 id="gt-轻量级："><a href="#gt-轻量级：" class="headerlink" title="-&gt;轻量级："></a><strong>-&gt;轻量级：</strong></h4><ul>
+<li>与创建进程相比，线程创建仅仅更少开销，对线程的管理需要更少的系统资源。</li>
+<li>比如，下面的表格比较了fork()和pthread_create()两个子例程创建50, 000个进程和线程的开销。使用time命令测试所需的时间，以秒为单位，不对优化参数进行编译。<br>注意：通过将系统时间和用户时间相加得到真实的运行时间是不合理的，因为对于SMP系统中多CPUs/cores是在同一时间处理用一个问题。充其量而言，这些结果接近于在本地机器过去和现在运行的结果。</li>
+</ul>
+<table><br>    <tr><br>        <td>Foo</td><br>    </tr><br></table>
 
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//==============================================================================</span></span><br><span class="line"><span class="comment">//C Code for fork() creation test</span></span><br><span class="line"><span class="comment">//==============================================================================</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> NFORKS 50000</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">do_nothing</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> i;</span><br><span class="line">	i= <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> pid, j, status;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (j=<span class="number">0</span>; j&lt;NFORKS; j++) &#123;</span><br><span class="line"></span><br><span class="line">	  	<span class="comment">/*** error handling ***/</span></span><br><span class="line">	  	<span class="keyword">if</span> ((pid = fork()) &lt; <span class="number">0</span> ) &#123;</span><br><span class="line">	    	<span class="built_in">printf</span> (<span class="string">"fork failed with error code= %d\n"</span>, pid);</span><br><span class="line">	    	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">	    &#125;</span><br><span class="line"></span><br><span class="line">	  	<span class="comment">/*** this is the child of the fork ***/</span></span><br><span class="line">	  	<span class="keyword">else</span> <span class="keyword">if</span> (pid ==<span class="number">0</span>) &#123;</span><br><span class="line">	    	do_nothing();</span><br><span class="line">	    	<span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">	    &#125;</span><br><span class="line"></span><br><span class="line">	  	<span class="comment">/*** this is the parent of the fork ***/</span></span><br><span class="line">	  	<span class="keyword">else</span> &#123;</span><br><span class="line">	    	waitpid(pid, status, <span class="number">0</span>);</span><br><span class="line">	    &#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//==============================================================================</span></span><br><span class="line"><span class="comment">//C Code for pthread_create() test</span></span><br><span class="line"><span class="comment">//==============================================================================</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> NTHREADS 50000</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">do_nothing</span><span class="params">(<span class="keyword">void</span> *null)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> i;</span><br><span class="line">	i=<span class="number">0</span>;</span><br><span class="line">	pthread_exit(<span class="literal">NULL</span>);</span><br><span class="line">&#125;                      </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> rc, i, j, detachstate;</span><br><span class="line">	<span class="keyword">pthread_t</span> tid;</span><br><span class="line">	<span class="keyword">pthread_attr_t</span> attr;</span><br><span class="line"></span><br><span class="line">	pthread_attr_init(&amp;attr);</span><br><span class="line">	pthread_attr_setdetachstate(&amp;attr, PTHREAD_CREATE_JOINABLE);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (j=<span class="number">0</span>; j&lt;NTHREADS; j++) &#123;</span><br><span class="line">		rc = pthread_create(&amp;tid, &amp;attr, do_nothing, NULL);</span><br><span class="line">		<span class="keyword">if</span> (rc) &#123;              </span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">"ERROR; return code from pthread_create() is %d\n"</span>, rc);</span><br><span class="line">			<span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">/* Wait for the thread */</span></span><br><span class="line">		rc = pthread_join(tid, NULL);</span><br><span class="line">		<span class="keyword">if</span> (rc) &#123;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">"ERROR; return code from pthread_join() is %d\n"</span>, rc);</span><br><span class="line">			<span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	pthread_attr_destroy(&amp;attr);</span><br><span class="line">	pthread_exit(<span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
           
         
       
@@ -370,6 +428,7 @@
 
       
       
+        <div class="post-eof-text">END</div>
         <div class="post-eof"></div>
       
     </footer>
@@ -490,6 +549,7 @@
 
       
       
+        <div class="post-eof-text">END</div>
         <div class="post-eof"></div>
       
     </footer>
@@ -638,6 +698,7 @@
 
       
       
+        <div class="post-eof-text">END</div>
         <div class="post-eof"></div>
       
     </footer>
@@ -766,6 +827,7 @@
 
       
       
+        <div class="post-eof-text">END</div>
         <div class="post-eof"></div>
       
     </footer>

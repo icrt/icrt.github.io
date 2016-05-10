@@ -188,7 +188,7 @@ body {
   font-family: 'Lato', "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 14px;
   line-height: 2;
-  color: #555;
+  color: #000;
   background: #fff;
 }
 @media (max-width: 767px) {
@@ -277,7 +277,7 @@ p {
   margin: 0 0 25px 0;
 }
 a {
-  color: #555;
+  color: #000;
   text-decoration: none;
   border-bottom: 1px solid #999;
   word-wrap: break-word;
@@ -374,6 +374,7 @@ dd {
 }
 .affix.affix.affix {
   position: fixed;
+  background: rgba(255,255,255,0.56);
 }
 .translation {
   margin-top: -20px;
@@ -455,7 +456,7 @@ body {
 .header-inner {
   margin: 0 auto;
   padding: 100px 0 70px;
-  width: 700px;
+  width: 900px;
 }
 @media (min-width: 1600px) {
   .container .header-inner {
@@ -467,7 +468,7 @@ body {
 }
 .main-inner {
   margin: 0 auto;
-  width: 700px;
+  width: 900px;
 }
 @media (min-width: 1600px) {
   .container .main-inner {
@@ -484,7 +485,7 @@ body {
 .footer-inner {
   box-sizing: border-box;
   margin: 20px auto;
-  width: 700px;
+  width: 900px;
 }
 @media (min-width: 1600px) {
   .container .footer-inner {
@@ -508,7 +509,7 @@ code {
 code {
   padding: 2px 4px;
   word-break: break-all;
-  color: #555;
+  color: #000;
   background: #eee;
   border-radius: 4px;
   font-size: 13px;
@@ -728,7 +729,7 @@ pre .javascript .function {
   font-size: 14px;
   color: #fff;
   background: #222;
-  border: 2px solid #555;
+  border: 2px solid #000;
   text-decoration: none;
   border-radius: 0;
   transition-property: background-color;
@@ -746,7 +747,7 @@ pre .javascript .function {
   display: block;
   width: 22px;
   height: 2px;
-  background: #555;
+  background: #000;
   border-radius: 1px;
 }
 .btn-bar+.btn-bar {
@@ -1227,7 +1228,7 @@ pre .javascript .function {
 .posts-expand .post-title-link {
   display: inline-block;
   position: relative;
-  color: #555;
+  color: #000;
   border-bottom: none;
   line-height: 1.2;
   vertical-align: top;
@@ -1263,7 +1264,7 @@ pre .javascript .function {
 }
 .posts-expand .post-meta {
   margin: 3px 0 60px 0;
-  color: #999;
+  color: #000;
   font-family: 'Lato', "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 12px;
   text-align: center;
@@ -1309,7 +1310,7 @@ pre .javascript .function {
   margin-top: 50px;
 }
 .post-more-link .btn {
-  color: #555;
+  color: #000;
   font-size: 14px;
   background: #fff;
   border-radius: 2px;
@@ -1341,7 +1342,7 @@ pre .javascript .function {
   display: inline-block;
   line-height: 25px;
   font-size: 14px;
-  color: #555;
+  color: #000;
   border-bottom: none;
 }
 .post-nav-item a:hover {
@@ -1359,10 +1360,14 @@ pre .javascript .function {
 }
 .posts-expand .post-eof {
   display: block;
-  margin: 80px auto 60px;
-  width: 8%;
+  margin: 0px auto 60px;
+  width: 65%;
   height: 1px;
   background: #ccc;
+  text-align: center;
+}
+.posts-expand .post-eof-text {
+  margin: 10px auto -3px;
   text-align: center;
 }
 .post:last-child .post-eof.post-eof.post-eof {
@@ -1405,7 +1410,7 @@ pre .javascript .function {
 }
 .sidebar a {
   color: #999;
-  border-bottom-color: #555;
+  border-bottom-color: #000;
 }
 .sidebar a:hover {
   color: #eee;
@@ -1467,7 +1472,7 @@ pre .javascript .function {
   padding: 2px;
   max-width: 120px;
   height: auto;
-  border: 1px solid #eee;
+/*border: $site-author-image-border-width solid $site-author-image-border-color;*/
 }
 .site-author-name {
   margin: 0;
@@ -1490,7 +1495,7 @@ pre .javascript .function {
 .site-state-item {
   display: inline-block;
   padding: 0 15px;
-  border-left: 1px solid #eee;
+/*border-left: 1px solid $site-state-item-border-color;*/
 }
 .site-state-item:first-child {
   border-left: none;
@@ -1538,7 +1543,7 @@ pre .javascript .function {
   vertical-align: middle;
   margin-right: 10px;
   margin-bottom: 10px;
-  border-bottom-color: #555;
+  border-bottom-color: #000;
   font-size: 13px;
 }
 .links-of-author a:before {
@@ -1549,7 +1554,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #f91404;
+  background: #ac01ff;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -1575,7 +1580,7 @@ pre .javascript .function {
   cursor: pointer;
   border-bottom: 1px solid transparent;
   font-size: 14px;
-  color: #555;
+  color: #000;
 }
 .sidebar-nav li:hover {
   color: #fc6423;
@@ -2095,7 +2100,7 @@ a.search-result {
   width: 10px;
   height: 10px;
   opacity: 0.5;
-  background: #555;
+  background: #000;
   border: 1px solid #fff;
   border-radius: 50%;
 }
@@ -2134,7 +2139,17 @@ a.search-result {
   overflow: hidden;
 }
 body {
-  background: #f5f7f9;
+/* 加载背景图 */
+  background-image: url("img/DSC_5454.jpg");
+/* 背景图垂直、水平均居中 */
+  background-position: center center;
+/* 背景图不平铺 */
+  background-repeat: no-repeat;
+/* 当内容高度大于图片高度时，背景图像的位置相对于viewport固定 */
+  background-attachment: fixed;
+/* 让背景图基于容器大小伸缩 */
+  background-size: cover;
+  color: #000;
 }
 @media (min-width: 992px) {
   .full-image.full-image.full-image {
@@ -2146,7 +2161,7 @@ body {
 .header {
   position: relative;
   margin: 0 auto;
-  width: 960px;
+  width: 1200px;
 }
 @media (min-width: 768px) and (max-width: 991px) {
   .header {
@@ -2164,7 +2179,7 @@ body {
   overflow: hidden;
   padding: 0;
   width: 240px;
-  background: #fff;
+  background: rgba(255,255,255,0.56);
 }
 @media (min-width: 1600px) {
   .container .header-inner {
@@ -2202,7 +2217,7 @@ body {
   }
 }
 .container .main-inner {
-  width: 960px;
+  width: 1200px;
 }
 @media (min-width: 768px) and (max-width: 991px) {
   .container .main-inner {
@@ -2218,8 +2233,8 @@ body {
   float: right;
   box-sizing: border-box;
   padding: 40px;
-  width: 700px;
-  background: #fff;
+  width: 900px;
+  background: rgba(255,255,255,0.56);
   min-height: 700px;
 }
 @media (min-width: 768px) and (max-width: 991px) {
@@ -2240,7 +2255,7 @@ body {
   float: left;
   margin-top: 300px;
   width: 240px;
-  background: #fff;
+  background: rgba(255,255,255,0.56);
   box-shadow: none;
 }
 @media (min-width: 768px) and (max-width: 991px) {
@@ -2257,7 +2272,7 @@ body {
   display: none;
 }
 .footer-inner {
-  width: 960px;
+  width: 1200px;
 }
 .footer-inner:before {
   content: " ";
@@ -2353,8 +2368,8 @@ body {
 }
 .menu .menu-item a:hover,
 .menu-item-active a {
-  background: #f9f9f9;
-  border-bottom-color: #fff;
+  background: rgba(249,249,249,0.68);
+  border-bottom-color: rgba(249,249,249,0.68);
 }
 .menu .menu-item br {
   display: none;
@@ -2394,8 +2409,7 @@ body {
 .sidebar-inner {
   box-sizing: border-box;
   width: 240px;
-  color: #555;
-  background: #fff;
+  color: #000;
 }
 .sidebar-inner.affix {
   position: fixed;
@@ -2414,7 +2428,7 @@ body {
   clear: both;
 }
 .sidebar a {
-  color: #555;
+  color: #000;
 }
 .sidebar a:hover {
   color: #222;
