@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Linux,C/C++,Lock," />
+  <meta name="keywords" content="Linux," />
 
 
 
@@ -86,16 +86,25 @@
 
 
 
-<meta name="description" content="锁和并发是一个非常大话题，往往在实际中大家都有点敬而远之，而网上的资料，特别是某度查出来的东西就是千篇一律互相Copy，很难看到有自己的思考在里面，很少会去讲为什么使用锁。如何高效的使用锁。某次面试面试官直接上来就说给我讲讲你满意的项目，然后就讲了之前基于Fuse写的数据去重文件。在讲的过程当中提到了使用了互斥锁pthread_mutex_lock，这个时候面试官打断了我，问到为什么要使用锁？在什">
+<meta name="description" content="最近两次遇到Linux系统中磁盘出现问题而导致不能写入和更改磁盘数据。
+问题的出现
+问题一： 某天早上导师说实验室网站挂掉了，让我去看看。从YII输出的错误信息看应该是后端MySQL连接不上，只好登录服务去查看MySQL进程是否存在。
+问题二： 今天由于实验室自己的Linux主机ubuntu出现问题，通过另外一块盘备份的时候出现不能写入，在该盘挂载的目录下执行命令都会提示Input/Output">
 <meta property="og:type" content="article">
-<meta property="og:title" content="为什么使用锁？自己的一些思考，以及死锁调试的方法">
-<meta property="og:url" content="http://yoursite.com/2016/05/07/WhyUseLock/index.html">
+<meta property="og:title" content="最近遇到的Linux文件系统只读问题">
+<meta property="og:url" content="http://yoursite.com/2016/05/20/diskErrorCheck/index.html">
 <meta property="og:site_name" content="ytZhou Blog">
-<meta property="og:description" content="锁和并发是一个非常大话题，往往在实际中大家都有点敬而远之，而网上的资料，特别是某度查出来的东西就是千篇一律互相Copy，很难看到有自己的思考在里面，很少会去讲为什么使用锁。如何高效的使用锁。某次面试面试官直接上来就说给我讲讲你满意的项目，然后就讲了之前基于Fuse写的数据去重文件。在讲的过程当中提到了使用了互斥锁pthread_mutex_lock，这个时候面试官打断了我，问到为什么要使用锁？在什">
-<meta property="og:updated_time" content="2016-05-08T01:59:08.677Z">
+<meta property="og:description" content="最近两次遇到Linux系统中磁盘出现问题而导致不能写入和更改磁盘数据。
+问题的出现
+问题一： 某天早上导师说实验室网站挂掉了，让我去看看。从YII输出的错误信息看应该是后端MySQL连接不上，只好登录服务去查看MySQL进程是否存在。
+问题二： 今天由于实验室自己的Linux主机ubuntu出现问题，通过另外一块盘备份的时候出现不能写入，在该盘挂载的目录下执行命令都会提示Input/Output">
+<meta property="og:updated_time" content="2016-05-20T14:23:57.434Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="为什么使用锁？自己的一些思考，以及死锁调试的方法">
-<meta name="twitter:description" content="锁和并发是一个非常大话题，往往在实际中大家都有点敬而远之，而网上的资料，特别是某度查出来的东西就是千篇一律互相Copy，很难看到有自己的思考在里面，很少会去讲为什么使用锁。如何高效的使用锁。某次面试面试官直接上来就说给我讲讲你满意的项目，然后就讲了之前基于Fuse写的数据去重文件。在讲的过程当中提到了使用了互斥锁pthread_mutex_lock，这个时候面试官打断了我，问到为什么要使用锁？在什">
+<meta name="twitter:title" content="最近遇到的Linux文件系统只读问题">
+<meta name="twitter:description" content="最近两次遇到Linux系统中磁盘出现问题而导致不能写入和更改磁盘数据。
+问题的出现
+问题一： 某天早上导师说实验室网站挂掉了，让我去看看。从YII输出的错误信息看应该是后端MySQL连接不上，只好登录服务去查看MySQL进程是否存在。
+问题二： 今天由于实验室自己的Linux主机ubuntu出现问题，通过另外一块盘备份的时候出现不能写入，在该盘挂载的目录下执行命令都会提示Input/Output">
 
 
 
@@ -113,7 +122,7 @@
   };
 </script>
 
-  <title> 为什么使用锁？自己的一些思考，以及死锁调试的方法 | ytZhou Blog </title>
+  <title> 最近遇到的Linux文件系统只读问题 | ytZhou Blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -253,7 +262,7 @@
             
             
               
-                为什么使用锁？自己的一些思考，以及死锁调试的方法
+                最近遇到的Linux文件系统只读问题
               
             
           </h1>
@@ -265,8 +274,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-05-07T21:57:49+08:00" content="2016-05-07">
-              2016-05-07
+            <time itemprop="dateCreated" datetime="2016-05-20T21:57:22+08:00" content="2016-05-20">
+              2016-05-20
             </time>
           </span>
 
@@ -279,8 +288,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Code/" itemprop="url" rel="index">
-                    <span itemprop="name">Code</span>
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
                   </a>
                 </span>
 
@@ -295,8 +304,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/05/07/WhyUseLock/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/07/WhyUseLock/" itemprop="commentsCount"></span>
+                <a href="/2016/05/20/diskErrorCheck/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/20/diskErrorCheck/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -319,8 +328,17 @@
       
 
       
-        <p>锁和并发是一个非常大话题，往往在实际中大家都有点敬而远之，而网上的资料，特别是某度查出来的东西就是千篇一律互相Copy，很难看到有自己的思考在里面，很少会去讲为什么使用锁。如何高效的使用锁。<br>某次面试面试官直接上来就说给我讲讲你满意的项目，然后就讲了之前基于Fuse写的数据去重文件。在讲的过程当中提到了使用了互斥锁pthread_mutex_lock，这个时候面试官打断了我，问到为什么要使用锁？在什么样的真实场景下需要使用锁？当时讲了两个应用同时读写一个文件，出现数据不一致。面试官强调了一下，给个实际的例子。当时没给出很实际的例子，后来面试官说我那样使用锁并不高效。<br>在面试过程中当中发现面试官其实非常强调合理和高效的使用锁，二面面试官当时也给出了问题，在高并发和高查询下，如何在不使用的锁的情况，完成数据更新的情况并保证不打断查询。当时给的解决方案是先将数据更新到另外一个地方，然后再将查询指向那个更新的地方，因为修改指针其实非常快。如果非要死扣细节的话，最佳应该是配合使用voilate关键字。</p>
-<h2 id="为什么使用锁"><a href="#为什么使用锁" class="headerlink" title="为什么使用锁"></a>为什么使用锁</h2><h2 id="锁的性能"><a href="#锁的性能" class="headerlink" title="锁的性能"></a>锁的性能</h2><h2 id="自己调试死锁的一些方法"><a href="#自己调试死锁的一些方法" class="headerlink" title="自己调试死锁的一些方法"></a>自己调试死锁的一些方法</h2><h2 id="待续"><a href="#待续" class="headerlink" title="待续"></a>待续</h2>
+        <p>最近两次遇到Linux系统中磁盘出现问题而导致不能写入和更改磁盘数据。</p>
+<h2 id="问题的出现"><a href="#问题的出现" class="headerlink" title="问题的出现"></a>问题的出现</h2><ul>
+<li><strong>问题一：</strong> 某天早上导师说实验室网站挂掉了，让我去看看。从YII输出的错误信息看应该是后端MySQL连接不上，只好登录服务去查看MySQL进程是否存在。</li>
+<li><strong>问题二：</strong> 今天由于实验室自己的Linux主机ubuntu出现问题，通过另外一块盘备份的时候出现不能写入，在该盘挂载的目录下执行命令都会提示Input/Output error。<a href="http://ubuntuforums.org/showthread.php?t=930991" target="_blank" rel="external">ubuntu forums上的相关问题</a></li>
+</ul>
+<h2 id="问题的解决"><a href="#问题的解决" class="headerlink" title="问题的解决"></a>问题的解决</h2><ul>
+<li>对于第一个问题登录主机之后发现MySQL进程存在。然后试着通过从shell登录MySQL，结果提示Can’t connect to local MySQL server through socket  /xx/xx.sock不能创建，网上说是需要修改这儿sock的权限+R即可，但是修改之后依旧不可以，ls之后发现已经是rwx了。这就让我非常纳闷了。后面发觉整个Linux文件系统不能写入东西了，然后more /proc/mounts之后发现分区的确变成ro只读状态了。由于之前备份过数据，只好冒着一定的危险，选择万能的重启策略了。最好，重启之后手动开启了Apache和Mysql服务就完成了问题的解决。</li>
+<li>由于有了之前的经验，今天遇到这个问题网上查了资料说是可能是磁盘损坏导致。通过dmesg命令发现，这一条log：<br>[  139.666511] EXT4-fs (sdb5): mounting ext3 file system using the ext4 subsystem<br>[  139.724006] EXT4-fs (sdb5): warning: mounting unchecked fs, running e2fsck is recommended<br>[  139.725427] EXT4-fs (sdb5): mounted filesystem with ordered data mode. Opts: (null)<br>[  200.126359] EXT4-fs error (device sdb5): ext4_lookup:1441: inode #110643744: comm rm: deleted inode referenced: 110668315<br>既然如此提示，那就通过e2fsck来修复sdb5这个分区，但是修复的时候没选-a自动修复参数，默然是-y交互方式，导致修复的时候一直按y按了好长时间 囧。</li>
+</ul>
+<h2 id="小记"><a href="#小记" class="headerlink" title="小记"></a>小记</h2><p>当磁盘出现问题的时候一般会发出信号，使得文件系统变成只读模式，此时不能修改和写入数据。这个时候比较快的策略应该是dmesg查看kernel的log，然后通过mount或者/proc/mounts看已经挂载分区的状态。如果是重要数据那么选择备份之后，卸载文件系统尝试通过e2fsck/fsck命令修复分区。<br>涉及命令：mount/umount/df/fdisk/lsof(这个命令很强大，非常有用)/fsck/e2fsck(-a自动修复，-y交互模式)</p>
+
       
     </div>
 
@@ -343,10 +361,6 @@
           
             <a href="/tags/Linux/" rel="tag">#Linux</a>
           
-            <a href="/tags/C-C/" rel="tag">#C/C++</a>
-          
-            <a href="/tags/Lock/" rel="tag">#Lock</a>
-          
         </div>
       
 
@@ -354,17 +368,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/05/06/sizeof/" rel="next" title="基本数据类型，结构体，类的sizeof大小">
-                <i class="fa fa-chevron-left"></i> 基本数据类型，结构体，类的sizeof大小
+              <a href="/2016/05/08/POSIX-Threads-Programming/" rel="next" title="(译)POSIX Threads Programming（POSIX线程编程）">
+                <i class="fa fa-chevron-left"></i> (译)POSIX Threads Programming（POSIX线程编程）
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/05/08/POSIX-Threads-Programming/" rel="prev" title="(译)POSIX Threads Programming（POSIX线程编程）">
-                (译)POSIX Threads Programming（POSIX线程编程） <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -390,8 +400,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/05/07/WhyUseLock/"
-           data-title="为什么使用锁？自己的一些思考，以及死锁调试的方法" data-url="http://yoursite.com/2016/05/07/WhyUseLock/">
+      <div class="ds-thread" data-thread-key="2016/05/20/diskErrorCheck/"
+           data-title="最近遇到的Linux文件系统只读问题" data-url="http://yoursite.com/2016/05/20/diskErrorCheck/">
       </div>
     
   </div>
@@ -509,7 +519,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么使用锁"><span class="nav-number">1.</span> <span class="nav-text">为什么使用锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#锁的性能"><span class="nav-number">2.</span> <span class="nav-text">锁的性能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自己调试死锁的一些方法"><span class="nav-number">3.</span> <span class="nav-text">自己调试死锁的一些方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#待续"><span class="nav-number">4.</span> <span class="nav-text">待续</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题的出现"><span class="nav-number">1.</span> <span class="nav-text">问题的出现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题的解决"><span class="nav-number">2.</span> <span class="nav-text">问题的解决</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小记"><span class="nav-number">3.</span> <span class="nav-text">小记</span></a></li></ol></div>
             
           </div>
         </section>
