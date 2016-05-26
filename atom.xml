@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2016-05-20T14:23:57.434Z</updated>
+  <updated>2016-05-26T13:27:31.232Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -14,6 +14,29 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>自己常用的的Vim配置</title>
+    <link href="http://yoursite.com/2016/05/26/vimConfig/"/>
+    <id>http://yoursite.com/2016/05/26/vimConfig/</id>
+    <published>2016-05-26T13:24:06.000Z</published>
+    <updated>2016-05-26T13:27:31.232Z</updated>
+    
+    <content type="html">&lt;p&gt;前段时间重装机器，又重新配置环境，发觉还是之前的vim配置好用。网上的vim配置大多感觉太麻烦或者要么就是太“笨重“。个人觉得vim配合ctags看代码和写代码已经足够用了。&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;22&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;23&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;24&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;25&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;26&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;set nocompatible&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;set nu&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;syntax on&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;set ruler&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;quot;set cursorline &amp;quot; 突出显示当前行&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;set ruler &amp;quot; 打开状态栏标尺&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;set shiftwidth=4 &amp;quot; 设定 &amp;lt;&amp;lt; 和 &amp;gt;&amp;gt; 命令移动时的宽度为 4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;set softtabstop=4 &amp;quot; 使得按退格键时可以一次删掉 4 个空格&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;set tabstop=4 &amp;quot; 设定 tab 长度为 4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;set incsearch &amp;quot; 输入搜索内容时就显示搜索结果&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;set hlsearch &amp;quot; 搜索时高亮显示被找到的文本&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;set autoindent&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;set cindent&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;quot;记录文件上次打开的位置&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;if has(&amp;quot;autocmd&amp;quot;)&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  au BufReadPost * if line(&amp;quot;&amp;apos;\&amp;quot;&amp;quot;) &amp;gt; 1 &amp;amp;&amp;amp; line(&amp;quot;&amp;apos;\&amp;quot;&amp;quot;) &amp;lt;= line(&amp;quot;$&amp;quot;) | exe &amp;quot;normal! g&amp;apos;\&amp;quot;&amp;quot; | endif&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;endif&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;quot;vi退出时自动清屏&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;set term=xterm&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;au VimLeave * :!clear&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;quot;tags跳转时显示可选列表&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;map &amp;lt;c-]&amp;gt; :ts &amp;lt;c-r&amp;gt;&amp;lt;c-w&amp;gt;&amp;lt;ENTER&amp;gt;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
+</content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;前段时间重装机器，又重新配置环境，发觉还是之前的vim配置好用。网上的vim配置大多感觉太麻烦或者要么就是太“笨重“。个人觉得vim配合ctags看代码和写代码已经足够用了。&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td
+    
+    </summary>
+    
+      <category term="Linux" scheme="http://yoursite.com/categories/Linux/"/>
+    
+    
+      <category term="Linux" scheme="http://yoursite.com/tags/Linux/"/>
+    
+  </entry>
   
   <entry>
     <title>最近遇到的Linux文件系统只读问题</title>
