@@ -255,6 +255,142 @@
             
               
                 
+                <a class="post-title-link" href="/2016/05/29/redisSourceCode1-aeMainFuncationAnalyise1/" itemprop="url">
+                  Redis源码分析（一）：aeMain()函数概述
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-29T21:57:18+08:00" content="2016-05-29">
+              2016-05-29
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Code/" itemprop="url" rel="index">
+                    <span itemprop="name">Code</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/05/29/redisSourceCode1-aeMainFuncationAnalyise1/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/05/29/redisSourceCode1-aeMainFuncationAnalyise1/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="缘起"><a href="#缘起" class="headerlink" title="缘起"></a>缘起</h2><p>临近毕业大部分事情处理的差不多，只想安静的看点东西，思考一下。找来了redis源码配合《Redis设计与实现》看了一下。大概浏览了一遍，看到main函数的最后其实就是aeMain()当中的一个大循环，对这个大循环有些兴趣。这不由得让我想起之前了一部分的Linux Kernel代码，Kernel源码最后其实也是一个大的循环，根据进程调度算法选择进程运行，模式还是比较相似。当然，Kernel源代码肯定要比这个复杂 ^_^<br>写下这篇博文也算是对学习过程的一个记录和思考。</p>
+<h2 id="对NoSQL的接触"><a href="#对NoSQL的接触" class="headerlink" title="对NoSQL的接触"></a>对NoSQL的接触</h2><p>在接触redis之前，最初接触到的比较成熟NoSQL是叫做Tokyo Cabinet的一套Key-Value存储（在这之前看过国人写的一个叫做Hash DB的Key-Value）。之前也看过它当中的hashdb的实现，Tokyo Cabinet与redis不同之处就是Tokyo Cabinet是一个持久化的Key-Value存储，每个db都会对应一个磁盘上持久化的文件。<br>继续本文正题。^_^</p>
+<h2 id="redis-c中的大循环"><a href="#redis-c中的大循环" class="headerlink" title="redis.c中的大循环"></a>redis.c中的大循环</h2><p>从下面的代码可以看到redis最后其实就是一个大的循环。只要redis服务不停止就不断调用beforeSleep()和aeProcessEvents（）函数。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//redis.c</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="comment">//................</span></span><br><span class="line">    aeSetBeforeSleepProc(server.el,beforeSleep);</span><br><span class="line">    aeMain(server.el);</span><br><span class="line">    aeDeleteEventLoop(server.el);</span><br><span class="line">    return <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ae.c</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">aeMain</span><span class="params">(aeEventLoop *eventLoop)</span> </span>&#123;</span><br><span class="line">    eventLoop-&gt;stop = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (!eventLoop-&gt;stop) &#123;</span><br><span class="line">        <span class="keyword">if</span> (eventLoop-&gt;beforesleep != <span class="literal">NULL</span>)</span><br><span class="line">            eventLoop-&gt;beforesleep(eventLoop);</span><br><span class="line">        aeProcessEvents(eventLoop, AE_ALL_EVENTS);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="beforesleep函数“注册”"><a href="#beforesleep函数“注册”" class="headerlink" title="beforesleep函数“注册”"></a>beforesleep函数“注册”</h2><p>从下面的代码可以看到aeSetBeforeSleepProc()函数将beforeSleep“注册”到server.el下。<br>其实就是让server.el.beforsleep这个函数指针指向beforesleep函数。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">aeSetBeforeSleepProc</span><span class="params">(aeEventLoop *eventLoop, aeBeforeSleepProc *beforesleep)</span> </span>&#123;</span><br><span class="line">     eventLoop-&gt;beforesleep = beforesleep;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="beforeSleep-eventLoop"><a href="#beforeSleep-eventLoop" class="headerlink" title="beforeSleep(eventLoop)"></a>beforeSleep(eventLoop)</h2><p>beforeSleep主要有以及几个功能：</p>
+<ol>
+<li>如果启动集群功能（在我自己搭建过程是standalone mode，并未开启集群模式。其实是只有一台机器，玩不了集群模式→_→），则通过clusterBeforeSleep()进行集群故障转移，状态更新等操作；</li>
+<li>调用activeExpireCycle()处理“过期”的Key-Value对，减少内存的占用</li>
+<li>如果在上一次循环中有客户端blocked，那么给所有的slave发送一个ACK请求；</li>
+<li>将AOF buffer写入到磁盘当中。有趣的是，AOF buffer写入磁盘是另外的线程去完成，并未使用主进程去完成，避免主进程的阻塞和挂起，相比内存操作而言磁盘要慢一些。这一个点在后面的文章中去分析。</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">beforeSleep</span><span class="params">(<span class="keyword">struct</span> aeEventLoop *eventLoop)</span> </span>&#123;</span><br><span class="line">    REDIS_NOTUSED(eventLoop);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (server.cluster_enabled) clusterBeforeSleep();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (server.active_expire_enabled &amp;&amp; server.masterhost == <span class="literal">NULL</span>)</span><br><span class="line">        activeExpireCycle(ACTIVE_EXPIRE_CYCLE_FAST);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (server.get_ack_from_slaves) &#123;</span><br><span class="line">        robj *argv[<span class="number">3</span>];</span><br><span class="line"></span><br><span class="line">        argv[<span class="number">0</span>] = createStringObject(<span class="string">"REPLCONF"</span>,<span class="number">8</span>);</span><br><span class="line">        argv[<span class="number">1</span>] = createStringObject(<span class="string">"GETACK"</span>,<span class="number">6</span>);</span><br><span class="line">        argv[<span class="number">2</span>] = createStringObject(<span class="string">"*"</span>,<span class="number">1</span>); </span><br><span class="line">        replicationFeedSlaves(server.slaves, server.slaveseldb, argv, <span class="number">3</span>);</span><br><span class="line">        decrRefCount(argv[<span class="number">0</span>]);</span><br><span class="line">        decrRefCount(argv[<span class="number">1</span>]);</span><br><span class="line">        decrRefCount(argv[<span class="number">2</span>]);</span><br><span class="line">        server.get_ack_from_slaves = <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (listLength(server.clients_waiting_acks))</span><br><span class="line">        processClientsWaitingReplicas();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (listLength(server.unblocked_clients))</span><br><span class="line">        processUnblockedClients();</span><br><span class="line"></span><br><span class="line">    flushAppendOnlyFile(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="aeProcessEvents-eventLoop-AE-ALL-EVENTS"><a href="#aeProcessEvents-eventLoop-AE-ALL-EVENTS" class="headerlink" title="aeProcessEvents(eventLoop, AE_ALL_EVENTS)"></a>aeProcessEvents(eventLoop, AE_ALL_EVENTS)</h2><p>aeProcessEvents()函数的主要功能简单来说，就是调用epoll_wait获取状态改变的fd，判断满足要求的fd的，并调用指定的处理函数。处理完成client的请求之后转而去运行server.el.timeEventHead中的事件函数。这样就完成了一次大的aeMain()中的循环。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">aeProcessEvents</span><span class="params">(aeEventLoop *eventLoop, <span class="keyword">int</span> flags)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> processed = <span class="number">0</span>, numevents;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!(flags &amp; AE_TIME_EVENTS) &amp;&amp; !(flags &amp; AE_FILE_EVENTS)) return <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (eventLoop-&gt;maxfd != <span class="number">-1</span> ||</span><br><span class="line">        ((flags &amp; AE_TIME_EVENTS) &amp;&amp; !(flags &amp; AE_DONT_WAIT))) &#123;</span><br><span class="line">        <span class="keyword">int</span> j;</span><br><span class="line">        aeTimeEvent *shortest = <span class="literal">NULL</span>;</span><br><span class="line">        <span class="keyword">struct</span> timeval tv, *tvp;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (flags &amp; AE_TIME_EVENTS &amp;&amp; !(flags &amp; AE_DONT_WAIT))</span><br><span class="line">            shortest = aeSearchNearestTimer(eventLoop);</span><br><span class="line">        <span class="keyword">if</span> (shortest) &#123;</span><br><span class="line">            <span class="keyword">long</span> now_sec, now_ms;</span><br><span class="line"></span><br><span class="line">            <span class="comment">/* Calculate the time missing for the nearest</span><br><span class="line">             * timer to fire. */</span></span><br><span class="line">            aeGetTime(&amp;now_sec, &amp;now_ms);</span><br><span class="line">            tvp = &amp;tv;</span><br><span class="line">            tvp-&gt;tv_sec = shortest-&gt;when_sec - now_sec;</span><br><span class="line">            <span class="keyword">if</span> (shortest-&gt;when_ms &lt; now_ms) &#123;</span><br><span class="line">                tvp-&gt;tv_usec = ((shortest-&gt;when_ms+<span class="number">1000</span>) - now_ms)*<span class="number">1000</span>;</span><br><span class="line">                tvp-&gt;tv_sec --;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                tvp-&gt;tv_usec = (shortest-&gt;when_ms - now_ms)*<span class="number">1000</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (tvp-&gt;tv_sec &lt; <span class="number">0</span>) tvp-&gt;tv_sec = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">if</span> (tvp-&gt;tv_usec &lt; <span class="number">0</span>) tvp-&gt;tv_usec = <span class="number">0</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (flags &amp; AE_DONT_WAIT) &#123;</span><br><span class="line">                tv.tv_sec = tv.tv_usec = <span class="number">0</span>;</span><br><span class="line">                tvp = &amp;tv;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                tvp = <span class="literal">NULL</span>; <span class="comment">/* wait forever */</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        numevents = aeApiPoll(eventLoop, tvp);</span><br><span class="line">        <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; numevents; j++) &#123;</span><br><span class="line">            aeFileEvent *fe = &amp;eventLoop-&gt;events[eventLoop-&gt;fired[j].fd];</span><br><span class="line">            <span class="keyword">int</span> mask = eventLoop-&gt;fired[j].mask;</span><br><span class="line">            <span class="keyword">int</span> fd = eventLoop-&gt;fired[j].fd;</span><br><span class="line">            <span class="keyword">int</span> rfired = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (fe-&gt;mask &amp; mask &amp; AE_READABLE) &#123;</span><br><span class="line">                rfired = <span class="number">1</span>;</span><br><span class="line">                fe-&gt;rfileProc(eventLoop,fd,fe-&gt;clientData,mask);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (fe-&gt;mask &amp; mask &amp; AE_WRITABLE) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!rfired || fe-&gt;wfileProc != fe-&gt;rfileProc)</span><br><span class="line">                    fe-&gt;wfileProc(eventLoop,fd,fe-&gt;clientData,mask);</span><br><span class="line">            &#125;</span><br><span class="line">            processed++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (flags &amp; AE_TIME_EVENTS)</span><br><span class="line">        processed += processTimeEvents(eventLoop);</span><br><span class="line"></span><br><span class="line">    return processed; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="与aeMain-相关的数据结构"><a href="#与aeMain-相关的数据结构" class="headerlink" title="与aeMain()相关的数据结构"></a>与aeMain()相关的数据结构</h2><p>如下图所示，redis中主要的数据结构。在后续的文章中会重点分析跟aeMain()比较相关的部分是如何完成初始化，以及aeMain(）中网络编程相关的部分。<br><img src="http://img.blog.csdn.net/20160529214458854" alt=""></p>
+<h3 id="本文参考"><a href="#本文参考" class="headerlink" title="本文参考"></a>本文参考</h3><p>《redis设计与分析》<br>《Redis in Action》</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof-text">END</div>
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/05/26/vimConfig/" itemprop="url">
                   自己常用的的Vim配置
                 </a>
@@ -1127,7 +1263,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-count">7</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1144,7 +1280,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -1174,7 +1310,7 @@
               </span>
             
               <span class="links-of-author-item">
-                <a href="https://ytZhou.lofter.com" target="_blank" title="lofter">
+                <a href="http://ytZhou.lofter.com" target="_blank" title="lofter">
                   
                     <i class="fa fa-fw fa-lofter"></i>
                   
